@@ -12,24 +12,33 @@ func StartServer(front_port, back_port string) {
 	checkError(err, "ResolveTCPAddr")
 	l, err := net.ListenTCP("tcp", tcpAddr)
 	checkError(err, "ListenTCP")
-	conns := make(map[string]net.Conn)
+	// conns := make(map[string]net.Conn)
 	client_msg := make(chan string, 10)
 
 	server_in_msg := make(chan string, 10)
 	server_out_msg := make(chan string, 10)
 
+	sessions := make(map[string]Session)
+
 	go BackDoor(back_port, server_in_msg, server_out_msg)
 
-	go Dispatch(&conns, client_msg, server_in_msg, server_out_msg)
+	go Dispatch(&sessions, client_msg, server_in_msg, server_out_msg)
 
+	id_gen := 1
 	for {
 		fmt.Println("Listening ...")
 		conn, err := l.Accept()
 		checkError(err, "Accept")
 		fmt.Println("front Accepting ...")
-		conns[conn.RemoteAddr().String()] = conn
+		sessions[conn.RemoteAddr().String()] = Session{
+			id:   id_gen,
+			conn: conn,
+		}
+		session := sessions[conn.RemoteAddr().String()]
 		//启动一个新线程
-		go Handler(conn, client_msg)
+		go session.Handler(client_msg)
+
+		id_gen++
 	}
 
 }

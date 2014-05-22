@@ -13,10 +13,12 @@ import (
 )
 
 type Session struct {
-	id int64
+	id   int
+	conn net.Conn
 }
 
-func Handler(conn net.Conn, messages chan string) {
+func (session *Session) Handler(messages chan string) {
+	conn := session.conn
 	fmt.Println("connection is connected from ...", conn.RemoteAddr().String())
 
 	buf := make([]byte, 1024)
@@ -32,6 +34,5 @@ func Handler(conn net.Conn, messages chan string) {
 		//fmt.Println("Rec[",conn.RemoteAddr().String(),"] Say :" ,string(buf[0:lenght]))
 		reciveStr := string(buf[0:lenght])
 		messages <- reciveStr
-
 	}
 }
