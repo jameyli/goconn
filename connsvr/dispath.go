@@ -9,7 +9,7 @@ import (
 //     id int64
 // }
 
-func Dispatch(sessions *map[string]Session, client_msg, server_in_msg, server_out_msg chan string) {
+func Dispatch(sessions *map[uint64]*Session, client_msg, server_in_msg, server_out_msg chan string) {
 	for {
 		select {
 		case msg := <-client_msg:
@@ -17,9 +17,9 @@ func Dispatch(sessions *map[string]Session, client_msg, server_in_msg, server_ou
 			server_in_msg <- msg
 
 		case msg := <-server_out_msg:
+			fmt.Println("server_msg:", msg)
 			for key, value := range *sessions {
-				fmt.Println("connection is connected from ...", key)
-				_, err := value.conn.Write([]byte(msg))
+				err := value.SendToClient(msg)
 				if err != nil {
 					fmt.Println(err.Error())
 					delete(*sessions, key)
