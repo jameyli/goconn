@@ -14,17 +14,18 @@ How To Run?
 -----------
 
 * 启动 connsvr
-
+``` sh
     cd connsvr;
     go run *.go 6666 8888
-
+```
 * 启动 后端
-
+``` sh
     go run client.go 8888
-
+```
 * 启动 客户端
-
+``` sh
     go run client.go 6666
+```
 
 
 
